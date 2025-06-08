@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import List, Dict, Any
+import argparse
+import json
 
 
 @dataclass
@@ -28,6 +30,15 @@ class Post:
     user_id: str
     content: Any
     metadata: Dict[str, Any]
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the Post dataclass to a plain dictionary."""
+        return {
+            'post_id': self.post_id,
+            'user_id': self.user_id,
+            'content': self.content,
+            'metadata': self.metadata,
+        }
 
 
 def collect_from_x(api_client, query: str, max_results: int = 100) -> Dict[str, List[Post]]:
@@ -311,3 +322,74 @@ __all__ = [
     'collect_from_bilibili',
     'merge_results',
 ]
+
+
+def _run_cli() -> None:
+    """Command-line interface for the example scrapers."""
+    parser = argparse.ArgumentParser(
+        description='Collect posts from various social platforms using APIs.'
+    )
+    subparsers = parser.add_subparsers(dest='platform', required=True)
+
+    x_parser = subparsers.add_parser('x', help='Scrape X (Twitter)')
+    x_parser.add_argument('--query', required=True)
+    x_parser.add_argument('--max-results', type=int, default=100)
+
+    telegram_parser = subparsers.add_parser('telegram', help='Scrape Telegram')
+    telegram_parser.add_argument('--channel', required=True)
+    telegram_parser.add_argument('--limit', type=int, default=100)
+
+    youtube_parser = subparsers.add_parser('youtube', help='Scrape YouTube')
+    youtube_parser.add_argument('--channel-id', required=True)
+    youtube_parser.add_argument('--max-results', type=int, default=50)
+
+    tiktok_parser = subparsers.add_parser('tiktok', help='Scrape TikTok')
+    tiktok_parser.add_argument('--query', required=True)
+    tiktok_parser.add_argument('--limit', type=int, default=50)
+
+    xhs_parser = subparsers.add_parser('xiaohongshu', help='Scrape Xiaohongshu')
+    xhs_parser.add_argument('--keyword', required=True)
+    xhs_parser.add_argument('--limit', type=int, default=50)
+
+    bili_parser = subparsers.add_parser('bilibili', help='Scrape Bilibili')
+    bili_parser.add_argument('--uid', required=True)
+    bili_parser.add_argument('--limit', type=int, default=50)
+
+    parser.add_argument('--out', default='-', help='Output JSON file (default: stdout)')
+
+    args = parser.parse_args()
+
+    # Placeholder: in real usage, create and authenticate API clients here.
+    api_client = None
+
+    if args.platform == 'x':
+        data = collect_from_x(api_client, args.query, args.max_results)
+    elif args.platform == 'telegram':
+        data = collect_from_telegram(api_client, args.channel, args.limit)
+    elif args.platform == 'youtube':
+        data = collect_from_youtube(api_client, args.channel_id, args.max_results)
+    elif args.platform == 'tiktok':
+        data = collect_from_tiktok(api_client, args.query, args.limit)
+    elif args.platform == 'xiaohongshu':
+        data = collect_from_xiaohongshu(api_client, args.keyword, args.limit)
+    elif args.platform == 'bilibili':
+        data = collect_from_bilibili(api_client, args.uid, args.limit)
+    else:
+        parser.error('Unsupported platform')
+
+    # Serialize posts grouped by user_id to JSON
+    json_data = {
+        uid: [post.to_dict() for post in posts] for uid, posts in data.items()
+    }
+
+    if args.out == '-':
+        json.dump(json_data, sys.stdout, ensure_ascii=False, indent=2)
+    else:
+        with open(args.out, 'w', encoding='utf-8') as f:
+            json.dump(json_data, f, ensure_ascii=False, indent=2)
+
+
+if __name__ == '__main__':
+    import sys
+    _run_cli()
+
