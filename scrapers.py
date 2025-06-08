@@ -23,6 +23,7 @@ import json
 import sys
 
 
+
 @dataclass
 class Post:
     """Represents a generic social media post."""
@@ -40,7 +41,6 @@ class Post:
             'content': self.content,
             'metadata': self.metadata,
         }
-
 
 def collect_from_x(api_client, query: str, max_results: int = 100) -> Dict[str, List[Post]]:
     """Collect posts from X (formerly Twitter) using the official API.
@@ -119,6 +119,7 @@ def collect_from_telegram(client, channel: str, limit: int = 100) -> Dict[str, L
             }
         }
     """
+
     try:
         from telethon import events  # type: ignore
     except ImportError:
@@ -166,7 +167,6 @@ def collect_from_youtube(api_client, channel_id: str, max_results: int = 50) -> 
         }
     """
     results: Dict[str, List[Post]] = {}
-
     if api_client is None:
         print('collect_from_youtube: missing API client, returning empty result', file=sys.stderr)
         return results
@@ -259,11 +259,10 @@ def collect_from_xiaohongshu(api_client, keyword: str, limit: int = 50) -> Dict[
         }
     """
     results: Dict[str, List[Post]] = {}
-
     if api_client is None:
         print('collect_from_xiaohongshu: missing API client, returning empty result', file=sys.stderr)
         return results
-
+      
     params = {
         'keyword': keyword,
         'page_size': limit,
