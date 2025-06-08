@@ -22,6 +22,7 @@ import argparse
 import json
 
 
+
 @dataclass
 class Post:
     """Represents a generic social media post."""
@@ -39,7 +40,6 @@ class Post:
             'content': self.content,
             'metadata': self.metadata,
         }
-
 
 def collect_from_x(api_client, query: str, max_results: int = 100) -> Dict[str, List[Post]]:
     """Collect posts from X (formerly Twitter) using the official API.
@@ -392,4 +392,3 @@ def _run_cli() -> None:
 if __name__ == '__main__':
     import sys
     _run_cli()
-
