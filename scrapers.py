@@ -20,10 +20,41 @@ from dataclasses import dataclass
 from typing import List, Dict, Any
 import argparse
 import json
+import sys
 
 
 
-@dataclass
+    if api_client is None:
+        print('collect_from_x: missing API client, returning empty result', file=sys.stderr)
+        return results
+
+    try:
+        from telethon import events  # type: ignore
+    except ImportError:
+        print('collect_from_telegram: telethon not installed, returning empty result', file=sys.stderr)
+        return {}
+
+    if client is None:
+        print('collect_from_telegram: missing API client, returning empty result', file=sys.stderr)
+        return results
+
+    if api_client is None:
+        print('collect_from_youtube: missing API client, returning empty result', file=sys.stderr)
+        return results
+
+    if api_client is None:
+        print('collect_from_tiktok: missing API client, returning empty result', file=sys.stderr)
+        return results
+
+
+    if api_client is None:
+        print('collect_from_xiaohongshu: missing API client, returning empty result', file=sys.stderr)
+        return results
+
+    if api_client is None:
+        print('collect_from_bilibili: missing API client, returning empty result', file=sys.stderr)
+        return results
+
 class Post:
     """Represents a generic social media post."""
 
@@ -390,5 +421,4 @@ def _run_cli() -> None:
 
 
 if __name__ == '__main__':
-    import sys
     _run_cli()
