@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Any
 import argparse
 import json
+import sys
 
 
 
@@ -69,6 +70,10 @@ def collect_from_x(api_client, query: str, max_results: int = 100) -> Dict[str, 
     """
     results: Dict[str, List[Post]] = {}
 
+    if api_client is None:
+        print('collect_from_x: missing API client, returning empty result', file=sys.stderr)
+        return results
+
     # Example using tweepy.Client for Twitter API v2
     response = api_client.search_recent_tweets(query=query, max_results=max_results)
 
@@ -114,9 +119,18 @@ def collect_from_telegram(client, channel: str, limit: int = 100) -> Dict[str, L
             }
         }
     """
-    from telethon import events  # type: ignore
+
+    try:
+        from telethon import events  # type: ignore
+    except ImportError:
+        print('collect_from_telegram: telethon not installed, returning empty result', file=sys.stderr)
+        return {}
 
     results: Dict[str, List[Post]] = {}
+
+    if client is None:
+        print('collect_from_telegram: missing API client, returning empty result', file=sys.stderr)
+        return results
     for message in client.iter_messages(entity=channel, limit=limit):
         if message.sender_id is None:
             continue
@@ -153,6 +167,10 @@ def collect_from_youtube(api_client, channel_id: str, max_results: int = 50) -> 
         }
     """
     results: Dict[str, List[Post]] = {}
+    if api_client is None:
+        print('collect_from_youtube: missing API client, returning empty result', file=sys.stderr)
+        return results
+
     request = api_client.search().list(part='snippet', channelId=channel_id, maxResults=max_results)
     response = request.execute()
 
@@ -199,6 +217,10 @@ def collect_from_tiktok(api_client, query: str, limit: int = 50) -> Dict[str, Li
     """
     results: Dict[str, List[Post]] = {}
 
+    if api_client is None:
+        print('collect_from_tiktok: missing API client, returning empty result', file=sys.stderr)
+        return results
+
     response = api_client.search_videos(query=query, max_count=limit)
     for video in response.get('data', []):
         creator_id = video['author']['id']
@@ -237,6 +259,10 @@ def collect_from_xiaohongshu(api_client, keyword: str, limit: int = 50) -> Dict[
         }
     """
     results: Dict[str, List[Post]] = {}
+    if api_client is None:
+        print('collect_from_xiaohongshu: missing API client, returning empty result', file=sys.stderr)
+        return results
+      
     params = {
         'keyword': keyword,
         'page_size': limit,
@@ -279,6 +305,10 @@ def collect_from_bilibili(api_client, uid: str, limit: int = 50) -> Dict[str, Li
         }
     """
     results: Dict[str, List[Post]] = {}
+
+    if api_client is None:
+        print('collect_from_bilibili: missing API client, returning empty result', file=sys.stderr)
+        return results
 
     params = {
         'mid': uid,
@@ -390,5 +420,5 @@ def _run_cli() -> None:
 
 
 if __name__ == '__main__':
-    import sys
     _run_cli()
+
